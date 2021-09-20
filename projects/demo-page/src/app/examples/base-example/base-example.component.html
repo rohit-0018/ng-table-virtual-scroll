@@ -1,7 +1,7 @@
 <cdk-virtual-scroll-viewport tvsItemSize
-                             class="wrapper mat-elevation-z2">
+                             class="wrapper mat-elevation-z2" [passedMatTable]="table2">
 
-  <table mat-table [dataSource]="dataSource">
+  <!-- <table mat-table [dataSource]="dataSource">
 
     <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
     <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
@@ -20,6 +20,42 @@
       <td mat-cell *matCellDef="let element">{{element.name}}</td>
     </ng-container>
 
-  </table>
-
+  </table> -->
+  some old good stuff
+  <ng-container [ngTemplateOutlet]="tableTemplate" #content>
+    table template area
+  </ng-container>
+  
 </cdk-virtual-scroll-viewport>
+<ng-template #tableTemplate>
+  old good stuff
+  <table mat-table [dataSource]="dataSource">
+
+    <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+    <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+
+    <ng-container matColumnDef="id">
+      <th mat-header-cell
+          *matHeaderCellDef
+          class="col-sm">No.</th>
+      <td mat-cell
+          *matCellDef="let element"
+          class="col-sm">{{element.id}}</td>
+    </ng-container>
+
+    <ng-container matColumnDef="name">
+      <th mat-header-cell *matHeaderCellDef>Name</th>
+      <td mat-cell *matCellDef="let element">{{element.name}}</td>
+    </ng-container>
+    <ng-container matColumnDef="df">
+      <th mat-header-cell *matHeaderCellDef>Name</th>
+      <td mat-cell *matCellDef="let element">{{element.name}}</td>
+    </ng-container>
+    <ng-container matColumnDef="fd">
+      <th mat-header-cell *matHeaderCellDef>Name</th>
+      <td mat-cell *matCellDef="let element">{{element.name}}</td>
+    </ng-container>
+
+  </table>
+</ng-template>
+Some good old stuff
