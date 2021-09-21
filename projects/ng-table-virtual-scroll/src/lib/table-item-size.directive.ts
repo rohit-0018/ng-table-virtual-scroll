@@ -62,6 +62,9 @@ export class TableItemSizeDirective implements OnChanges, AfterContentInit, OnDe
   @Input()
   bufferMultiplier: string | number = defaults.bufferMultiplier;
 
+  @Input()
+  passedMatTable: MatTable<any>;
+
   @ContentChild(MatTable, { static: false })
   table: MatTable<any>;
 
@@ -85,31 +88,38 @@ export class TableItemSizeDirective implements OnChanges, AfterContentInit, OnDe
       .map(def => def.sticky)
       .reduce((prevState, state) => prevState && state, true);
   }
+  private initMatTable(table) {
+    if (table) {
+      this.table = table;
+      const switchDataSourceOrigin = this.table["_switchDataSource"];
+      this.table["_switchDataSource"] = (dataSource: any) => {
+        switchDataSourceOrigin.call(this.table, dataSource);
+        this.connectDataSource(dataSource);
+      };
 
+      this.connectDataSource(this.table.dataSource);
+
+      this.scrollStrategy.stickyChange
+        .pipe(
+          filter(() => this.isStickyEnabled()),
+          // breaks sticky header on the top. needs investigation
+          // delayWhen(() => !this.stickyPositions ? timer(0) : of()),
+          tap(() => {
+            if (!this.stickyPositions) {
+              this.initStickyPositions();
+            }
+          }),
+          takeUntil(this.destroyed$)
+        )
+        .subscribe((stickyOffset) => {
+          this.setSticky(stickyOffset);
+        });
+    }
+  }
   ngAfterContentInit() {
-    const switchDataSourceOrigin = this.table['_switchDataSource'];
-    this.table['_switchDataSource'] = (dataSource: any) => {
-      switchDataSourceOrigin.call(this.table, dataSource);
-      this.connectDataSource(dataSource);
-    };
-
-    this.connectDataSource(this.table.dataSource);
-
-    this.scrollStrategy.stickyChange
-      .pipe(
-        filter(() => this.isStickyEnabled()),
-        // breaks sticky header on the top. needs investigation
-        // delayWhen(() => !this.stickyPositions ? timer(0) : of()),
-        tap(() => {
-          if (!this.stickyPositions) {
-            this.initStickyPositions();
-          }
-        }),
-        takeUntil(this.destroyed$)
-      )
-      .subscribe((stickyOffset) => {
-        this.setSticky(stickyOffset);
-      });
+    if (this.table) {
+      this.initMatTable(this.table);
+    }
   }
 
   connectDataSource(dataSource: any) {
@@ -144,6 +154,9 @@ export class TableItemSizeDirective implements OnChanges, AfterContentInit, OnDe
   }
 
   ngOnChanges() {
+    if (this.passedMatTable) {
+      this.initMatTable(this.passedMatTable);
+    }
     const config = {
       rowHeight: +this.rowHeight || defaults.rowHeight,
       headerHeight: this.headerEnabled ? +this.headerHeight || defaults.headerHeight : 0,
